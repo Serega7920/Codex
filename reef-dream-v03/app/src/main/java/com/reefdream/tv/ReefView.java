@@ -24,7 +24,7 @@ public final class ReefView extends GLSurfaceView {
         private static final String VERT =
           "attribute vec3 aPos; attribute vec3 aNormal; uniform mat4 uMvp; uniform mat4 uModel; varying vec3 vNormal; varying vec3 vWorld; void main(){ vec4 w=uModel*vec4(aPos,1.);vWorld=w.xyz;vNormal=mat3(uModel)*aNormal;gl_Position=uMvp*vec4(aPos,1.);}";
         private static final String FRAG =
-          "precision mediump float; varying vec3 vNormal; varying vec3 vWorld; uniform vec3 uColor; uniform float uTime; uniform float uFog; void main(){vec3 n=normalize(vNormal);vec3 light=normalize(vec3(-.4,.85,1.));float diff=max(dot(n,light),0.);float rim=pow(1.-max(dot(n,vec3(0.,0.,1.)),0.),2.);float caustic=.08*sin(vWorld.x*5.+uTime*.8)*sin(vWorld.z*4.-uTime*.6);vec3 c=uColor*(.30+.68*diff+caustic)+vec3(.13,.34,.39)*rim;float fog=clamp(uFog*.035*length(vWorld),0.,.48);c=mix(c,vec3(.02,.21,.30),fog);gl_FragColor=vec4(c,1.);}";
+          "precision mediump float; varying vec3 vNormal; varying vec3 vWorld; uniform vec3 uColor; uniform float uTime; uniform float uFog; void main(){vec3 n=normalize(vNormal);vec3 light=normalize(vec3(-.4,.85,1.));float diff=max(dot(n,light),0.);float rim=pow(1.-max(dot(n,vec3(0.,0.,1.)),0.),2.);float caustic=.13*sin(vWorld.x*5.+uTime*.8)*sin(vWorld.z*4.-uTime*.6);float spec=pow(max(dot(reflect(-light,n),normalize(vec3(0.,1.,2.))),0.),24.);vec3 c=uColor*(.23+.78*diff+caustic)+vec3(.12,.29,.34)*rim+vec3(.26,.36,.38)*spec;float fog=clamp(uFog*.035*length(vWorld),0.,.48);c=mix(c,vec3(.02,.21,.30),fog);gl_FragColor=vec4(c,1.);}";
         private final float[] projection=new float[16],view=new float[16],model=new float[16],mv=new float[16],mvp=new float[16];
         private int program,aPos,aNormal,uMvp,uModel,uColor,uTime,uFog;
         private Mesh sphere,cone,plane;
@@ -53,19 +53,20 @@ public final class ReefView extends GLSurfaceView {
             // Sandy seabed, made from a horizontal mesh.
             draw(plane,0,-.65f,0,11,1,8,0,0,new float[]{.55f,.47f,.32f},t);
             // Rounded rocks, staggered across the foreground and background.
-            for(int i=0;i<18;i++){
+            for(int i=0;i<28;i++){
                 float x=((i*37)%19-9)*.51f,z=-2.8f+(i%5)*1.25f;
                 float scale=.28f+(i%4)*.13f;
                 draw(sphere,x,-.54f,z,scale*1.3f,scale*.58f,scale,0,0,new float[]{.17f,.31f,.30f},t);
             }
             // Branching coral: cones with 3D depth and uneven heights.
-            for(int i=0;i<25;i++){
+            for(int i=0;i<40;i++){
                 float x=((i*19)%31-15)*.31f,z=-2.8f+(i%6)*.76f;
                 float hh=.35f+(i%5)*.15f;
                 float[] color=i%3==0?new float[]{.83f,.35f,.36f}:i%3==1?new float[]{.59f,.35f,.63f}:new float[]{.76f,.52f,.29f};
                 draw(cone,x,-.54f+hh*.5f,z,.10f,hh,.10f,0,0,color,t);
                 draw(cone,x-.14f,-.54f+hh*.67f,z,.065f,hh*.62f,.065f,0,28,color,t);
                 draw(cone,x+.15f,-.54f+hh*.58f,z,.07f,hh*.66f,.07f,0,-25,color,t);
+                draw(sphere,x,-.57f,z,.16f,.12f,.15f,0,0,new float[]{.23f,.27f,.23f},t);
             }
             // Independently animated 3D tropical fish with tails and fins.
             for(int i=0;i<16;i++){
@@ -100,6 +101,10 @@ public final class ReefView extends GLSurfaceView {
                 draw(cone,tailX,y,z,size*.52f,size*.95f,size*.18f,dir+(float)Math.sin(t*5+i)*18,90,color,t);
                 draw(cone,x,y+size*.53f,z,size*.24f,size*.5f,size*.20f,dir,0,color,t);
                 draw(sphere,x+(left?-size:size),y+size*.12f,z+size*.43f,size*.10f,size*.10f,size*.08f,0,0,new float[]{.015f,.03f,.04f},t);
+                // Two distinct side fins and a contrasting dorsal fin.
+                draw(cone,x,y-size*.12f,z+size*.40f,size*.20f,size*.55f,size*.10f,dir,50,color,t);
+                draw(cone,x,y-size*.12f,z-size*.40f,size*.20f,size*.55f,size*.10f,dir,-50,color,t);
+                draw(cone,x,y+size*.45f,z,size*.22f,size*.48f,size*.12f,dir,0,new float[]{.96f,.72f,.32f},t);
             }
             // Rising pearl-like bubbles.
             for(int i=0;i<24;i++){
