@@ -69,14 +69,31 @@ public final class ReefView extends GLSurfaceView {
             }
             // Independently animated 3D tropical fish with tails and fins.
             for(int i=0;i<16;i++){
-                float speed=.18f+(i%5)*.06f;
-                float phase=(i*.071f+t*speed*.10f)%1.25f;
-                boolean left=i%3==0;
-                float x=(left?1f-phase:phase)*11f-5.5f;
-                float y=.15f+(i%6)*.31f+(float)Math.sin(t*.75+i)*.10f;
-                float z=-2.7f+(i%5)*1.1f;
+                // Different fish swim left, right, toward and away from the viewer.
+                // Individual phase offsets keep the school from moving in sync.
+                float speed=.11f+(i%5)*.037f;
+                float cycle=(t*speed+i*.173f)%2f;
+                float pingPong=cycle<1f?cycle:2f-cycle;
+                int lane=i%4;
+                float x,z,dir;
+                if(lane==0){ // left to right
+                    x=-5.5f+11f*((t*speed+i*.13f)%1f);
+                    z=-2.7f+(i%5)*1.1f;dir=0f;
+                }else if(lane==1){ // right to left
+                    x=5.5f-11f*((t*speed+i*.13f)%1f);
+                    z=-2.7f+(i%5)*1.1f;dir=180f;
+                }else if(lane==2){ // diagonally toward camera
+                    x=-3.6f+7.2f*pingPong;
+                    z=-3.3f+4.3f*pingPong;
+                    dir=cycle<1f?-35f:145f;
+                }else{ // diagonally away from camera
+                    x=3.6f-7.2f*pingPong;
+                    z=1.3f-4.3f*pingPong;
+                    dir=cycle<1f?215f:35f;
+                }
+                float y=.15f+(i%6)*.31f+(float)Math.sin(t*(.5f+i*.04f)+i)*.12f;
                 float size=.24f+(i%4)*.06f;
-                float dir=left?180:0;
+                boolean left=(dir>90f&&dir<270f);
                 float[] color=colors[i%colors.length];
                 draw(sphere,x,y,z,size*1.6f,size*.68f,size*.48f,dir,0,color,t);
                 float tailX=x+(left?size*1.7f:-size*1.7f);
