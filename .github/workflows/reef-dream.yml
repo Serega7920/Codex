@@ -1,9 +1,11 @@
-name: Build Reef Dream APK
+name: Build Reef Dream v0.8 APK
 on:
   workflow_dispatch:
   push:
+    branches:
+      - reef-dream-v08-animated
     paths:
-      - 'ReefDream/**'
+      - 'ReefDream-v08/**'
       - '.github/workflows/reef-dream.yml'
 jobs:
   apk:
@@ -18,9 +20,9 @@ jobs:
         with:
           gradle-version: '8.7'
       - name: Build APK
-        working-directory: ReefDream
+        working-directory: ReefDream-v08
         run: gradle :app:assembleDebug --no-daemon
       - uses: actions/upload-artifact@v4
         with:
-          name: ReefDream-Android9-APK
-          path: ReefDream/app/build/outputs/apk/debug/*.apk
+          name: ReefDream-v08-Android9-APK
+          path: ReefDream-v08/app/build/outputs/apk/debug/*.apk
